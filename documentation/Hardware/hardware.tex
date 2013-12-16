@@ -1,0 +1,23 @@
+\section{Hardware}
+Existing development boards has been chosen to build the network player with a minimal  effort of development. The power supply will be build in a classic way with a toroidal transformer, bridge rectifiers and a reservoir capacitor. After this simple power supply two different voltages will be provided by two step-down transformer. The core of the network player will be a Carambol2 2.
+\subsection{Carambola2}
+The Carambola2 is a System On Chip (SoC) Module which has a MIPS processor with 400 MHz clock, 16 MB of SPI-Flash and 64 MB of RAM. The SoC provides 2 Ethernet connectors and a Wifi module as well as UART access and buses like inter circuit communication (i2c). Especially for audio playback the Carambola2 is equipted with the Inter-IC Sound(i2s) bus which is a bus for serielle digital audio transmission as well as Sony/Philips Digital Interface (S/PDIF) which is a interface specification for a digital audio interface for stereo or multi-channel audio. Unfortunately, there is no driver to use either i2s nor S/PDIF under openWRT because of this a USB sound card must be used to provide an audio output.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.4]{pictures/carambola2}
+\caption{Carambola2}
+\end{center}
+\end{figure}
+\subsection{USB-Sound}
+In the selection of the chipset for the USB-Soundchip the choice falls on the PCM2704 from Texas Instruments.The PCM2704 provides direkt analog audio output via Burr Brown Digital Analog Converter as well as digital audio output over S/PDIF and Toslink. In this case the referencedesing for the PCM2704 is available as an development board and that is used in this project. The PCM2704 operates directly as Human Interface Device(HID) which means that no special driver is needed. If there is a driver for the Carambola2 i2s and SPDIF available in the future, this hardware component will be obsolete.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.35]{pictures/pcm2704}
+\caption{PCM2704}
+\end{center}
+\end{figure}
+\subsection{LCD-Display}
+To display informations like title or artist there will be used a common lcd display with a hd4478 chipset with 16 columns and 2 rows or 20 clumns and 4 rows. To controll the display the circuit "LCD2USB" from Dr. Till Harbaum will be used. This circuit consist of an Atmel ATMEGA8 and uses the Avrusb library to communicate directly via USB with the LCD display. As alternative we will test a circuit which controls the LCD display via i2c. This has the advantage that the USB hub has one device less to manage.
+\subsection{Power supply}
+\subsection{Front panel control}

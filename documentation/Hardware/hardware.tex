@@ -9,6 +9,14 @@ The Carambola2 is a System On Chip (SoC) Module which has a MIPS processor with 
 \caption{Carambola2}
 \end{center}
 \end{figure}
+The Carambola2 development board provides two lines of holes for pinheaders and they provide the following assignment.
+
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.4]{pictures/carambola2_gpios}
+	\caption{Carambola2 Pinheader assignement}
+	\end{center}
+\end{figure}
 \subsection{USB-Sound}
 In the selection of the chipset for the USB-Soundchip the choice falls on the PCM2704 from Texas Instruments.The PCM2704 provides direkt analog audio output via Burr Brown Digital Analog Converter as well as digital audio output over S/PDIF and Toslink. In this case the referencedesing for the PCM2704 is available as an development board and that is used in this project. The PCM2704 operates directly as Human Interface Device(HID) which means that no special driver is needed. If there is a driver for the Carambola2 i2s and SPDIF available in the future, this hardware component will be obsolete.
 
@@ -45,6 +53,18 @@ As input device will be used a rotary encoder on the front panel.
 	\end{center}
 \end{figure}
 
+A fast test lets se a mapping of 
+
+right: 
+0\/0 $\rightarrow$ 0\/1 $\rightarrow$ 1\/1
+
+ 1/0 $\rightarrow$ 0\/0
+	
+left:
+0\/0 $\rightarrow$ 1\/0 $\rightarrow$ 1\/1
+
+ 0\/1 $\rightarrow$ 0\/0
+
 \begin{figure}[h!]
 \begin{center}
 \begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm]
@@ -57,9 +77,9 @@ As input device will be used a rotary encoder on the front panel.
  
   \path[->] (S)  edge [loop above] node {} (S)
              edge   [bend right]           node {right} (q1)
-             edge			   node {left} (q2)
-        (q1) edge  node {right} (q3)
-             edge              node {left} (S)
+             edge [bend right]		   node {left} (q2)
+        (q1) edge [bend right] node {right} (q3)
+             edge             node {left} (S)
         (q2) edge [bend left] node {right} (S)
              edge [bend left]  node {left} (q3);
         (q3) edge	node {} (S);

@@ -1,3 +1,4 @@
+
 \section{Hardware}
 Existing development boards has been chosen to build the network player with a minimal  effort of development. The power supply will be build in a classic way with a toroidal transformer, bridge rectifiers and a reservoir capacitor. After this simple power supply two different voltages will be provided by two step-down transformer. The core of the network player will be a Carambol2 2.
 \subsection{Carambola2}
@@ -37,3 +38,32 @@ Because we use half-wave rectification the capacity must be doubled. The reservo
 
 \subsection{Front panel control}
 As input device will be used a rotary encoder on the front panel.
+\begin{figure}[h!]
+	\begin{center}
+	\includegraphics[scale=0.5]{pictures/rotation_encoder}
+	\caption{Rotary Encoder}
+	\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm]
+  \node[initial,state] (S)      {$0/0$};
+  \node[state]         (q1) [right of= S]  {$0/1$};
+  \node[state]         (q2) [right of=q1] {$1/0$};
+  \node[state,accepting]	(q3)	[right of=q2]	{$1/1$};
+  
+ 
+ 
+  \path[->] (S)  edge [loop above] node {} (S)
+             edge   [bend right]           node {right} (q1)
+             edge			   node {left} (q2)
+        (q1) edge  node {right} (q3)
+             edge              node {left} (S)
+        (q2) edge [bend left] node {right} (S)
+             edge [bend left]  node {left} (q3);
+        (q3) edge	node {} (S);
+\end{tikzpicture}
+\caption{Rotary encoder states}
+\end{center}
+\end{figure}

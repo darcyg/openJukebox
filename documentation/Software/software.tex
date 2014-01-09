@@ -1,8 +1,17 @@
 \section{Software}
 \subsection{OpenWRT}
+\subsubsection{Enabeling I2C}
+To enable I2C on the Carambola2 it is necessary to emulate I2C with the gpio Pins of the Carambola2. The Linuxkernel deliver this function. This Function is enabled by loading the kernel module i2c-gpio-custom. A clean way to enable the kernel module would be adding it to the modules.d folder unfortualy this function is broken in the actual openWRT trunk therfore we add 
+\lstset{language = bash}
+\begin{lstlisting}[]
+insmod i2c-gpio-custom bus0=0,18,19
+\end{lstlisting}
+to /etc/rc.local which leeds to load the module after booting.
+\subsubsection{lcd4linux}
+
 \subsubsection{Patch for MPD-full}
 If the compilation of OpenWRT fails at the mpf-full package it is necesarry to patch the package with this \footnote{\url{http://patchwork.openwrt.org/patch/4335/}}{patch}. This patch is commited on the OpenWRT mailinglist but acceptet till today.
 %\lstinputlisting[caption=mpd-patch, language=make]{../openWRT-patches/OpenWrt-Devel-packages-sound-mpd-update-to-mpd-0.16.8.patch}
 
-\subsubsection*{this is not necesary}
-followed this \footnote{\url{https://forum.openwrt.org/viewtopic.php?id=38049}{informaiton} to compile mpd-full with pulseaudio support. used only the first instruction and didn't touched the pulseaudio makefile.
+%\subsubsection*{this is not necesary}
+%followed this \footnote{\url{https://forum.openwrt.org/viewtopic.php?id=38049}{informaiton} to compile mpd-full with pulseaudio support. used only the first instruction and didn't touched the pulseaudio makefile.

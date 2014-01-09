@@ -38,8 +38,7 @@ In the selection of the chipset for the USB-Soundchip the choice falls on the PC
 \caption{PCM2704}
 \end{center}
 \end{figure}
-\subsection{LCD-Display}
-To display informations like title or artist there will be used a common lcd display with a hd4478 chipset with 16 columns and 2 rows or 20 clumns and 4 rows. To controll the display the circuit "LCD2USB" from Dr. Till Harbaum will be used. This circuit consist of an Atmel ATMEGA8 and uses the Avrusb library to communicate directly via USB with the LCD display. As alternative we will test a circuit which controls the LCD display via i2c. This has the advantage that the USB hub has one device less to manage.
+
 \subsection{Power supply}
 Goal of the power supply is to provide the internal voltage with a minimum of noise.The power supply is designed in a classic way with an toroidal transformer and step-down transformer to provide 5V and 3.3V as output voltage. In the first step the torodial transformer transforms the 220V alternating current voltage into 12V alternating current voltage which feeds an bridge rectifier to get direct current voltage. The direct current voltage from the bridge rectifier fluctuate. To smooth the voltage a reservoir capacitor is used. The capacity of the capacitor can be calculated with the following formula.
 
@@ -75,44 +74,6 @@ After this test pinheader has been soldered in order to connect the other parts 
 
 \subsection{Front panel control}
 As input device will be used a rotary encoder on the front panel.
-\begin{figure}[h!]
-	\begin{center}
-	\includegraphics[scale=0.5]{pictures/rotation_encoder}
-	\caption{Rotary Encoder}
-	\end{center}
-\end{figure}
 
-A fast test lets see a mapping of 
-
-right: 
-0\/0 $\rightarrow$ 0\/1 $\rightarrow$ 1\/1
-
- 1/0 $\rightarrow$ 0\/0
-	
-left:
-0\/0 $\rightarrow$ 1\/0 $\rightarrow$ 1\/1
-
- 0\/1 $\rightarrow$ 0\/0
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm]
-  \node[initial,state] (S)      {$0/0$};
-  \node[state]         (q1) [right of= S]  {$0/1$};
-  \node[state]         (q2) [right of=q1] {$1/0$};
-  \node[state,accepting]	(q3)	[right of=q2]	{$1/1$};
-  
- 
- 
-  \path[->] (S)  edge [loop above] node {} (S)
-             edge   [bend right]           node {right} (q1)
-             edge [bend right]		   node {left} (q2)
-        (q1) edge [bend right] node {right} (q3)
-             edge             node {left} (S)
-        (q2) edge [bend left] node {right} (S)
-             edge [bend left]  node {left} (q3);
-        (q3) edge	node {} (S);
-\end{tikzpicture}
-\caption{Rotary encoder states}
-\end{center}
-\end{figure}
+\subsection{LCD-Display}
+To display informations like title or artist there will be used a common lcd display with a hd44780 chipset with 20 columns and 4 rows. To controll the display a PCF8574 I2C portextender is used.

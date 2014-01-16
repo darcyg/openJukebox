@@ -6,6 +6,10 @@
 #include <sys/signal.h>
 #include <string.h> // needed for memset
 
+//MPD relevant includes
+//#include <mpd/client.h>
+//#include <mpd/connection.h>
+
  
 void signal_handler_IO (int status);   /* definition of signal handler */
 
@@ -21,8 +25,16 @@ int main(int argc,char** argv)
 {
 	
 
+	////Establishing the mpd connection
+	//struct mpd_connection *conn;
+	//conn = mpd_connection_new(NULL, 0, 30000);
+	//if (mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
+	//	fprintf(stderr,"%s\n", mpd_connection_get_error_message(conn));
+	//	mpd_connection_free(conn);
+	//	return -1;
+	//}
  
-        printf("Please start with %s /dev/ttyS1 (for example)\n",argv[0]);
+        //printf("Please start with %s /dev/ttyS1 (for example)\n",argv[0]);
         memset(&stdio,0,sizeof(stdio));
         stdio.c_iflag=0;
         stdio.c_oflag=0;
@@ -48,9 +60,9 @@ int main(int argc,char** argv)
         tty_fd=open(argv[1], O_RDWR | O_NONBLOCK);      
 
 	saio.sa_handler = signal_handler_IO;
-     saio.sa_flags = 0;
-     saio.sa_restorer = NULL; 
-     sigaction(SIGIO,&saio,NULL);
+	saio.sa_flags = 0;
+	saio.sa_restorer = NULL; 
+	sigaction(SIGIO,&saio,NULL);
 
      fcntl(tty_fd, F_SETFL, FNDELAY);
      fcntl(tty_fd, F_SETOWN, getpid());
@@ -61,7 +73,7 @@ int main(int argc,char** argv)
         cfsetispeed(&tio,B9600);            // 115200 baud
  
         tcsetattr(tty_fd,TCSANOW,&tio);
-	printf("UART configured....\n");
+	//printf("UART configured....\n");
 	connected =1;
         while (connected == 1)
         {
@@ -72,17 +84,27 @@ int main(int argc,char** argv)
 			if(c=='1') {
 				system("mpc volume -2");//printf("v-\n");
 			}
-			if(c=='2') {
+			else if(c=='2') {
 				system("mpc volume +1"); //("v+\n");
 			}
-			if(c=='3') {
+			else if(c=='3') {
+				//mpd_send_toggle_pause(conn);
+				//system("mpc toggle");
+			}
+			else if(c=='4') {
+				system("mpc prev");
+			}
+			else if(c=='5') {
+				system("mpc next");
+			}
+			else if(c=='6') {
 				system("mpc toggle");
 			}
 		}
 	//sleep(0.5);
 	
         }
- 
+	//mpd_connection_free(conn); 
         close(tty_fd);
 }
 

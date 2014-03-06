@@ -97,6 +97,7 @@ int main(int argc,char** argv)
 		//Format for serial line. Artist;Title;elapsedTime;totalTime;consume;random_mode;single;state;kbit_rate;currentPositionsInPlaylist;totalCountOfSongsInPlaylist;volume
 		//each value which is noch changed since last transmit is not retransmittet
 		//entity = mpd_entity_begin(conn)
+		sleep(1);
 		status = mpd_run_status(conn);
 		if(status != NULL){
 		strcpy(transmitter,"");
@@ -251,54 +252,49 @@ int main(int argc,char** argv)
 			volume = mpd_status_get_volume(status);
 			char str[4];
 			sprintf(str,"%d",volume);
-			strcat(str,";");
+			strcat(str,";\n");
 			strcat(transmitter,str);
 		} else {
-			strcat(transmitter,";");
+			strcat(transmitter,";\n");
 		}
-		
-		//printf("time: %u/%u\t", mpd_status_get_elapsed_time(status), mpd_status_get_total_time(status));
-		
-		//Display Bitrate
-		//printf("bitrate: %i\t", mpd_status_get_kbit_rate(status));
-
-		//Display Volume
-		//printf("volume: %i\t", mpd_status_get_volume(status));
-
-		//Display random
-		//if(mpd_status_get_random(status))
-	
-		
-		//Display Artist and Songtitle
-		//get song position
-		//int song_position = mpd_status_get_song_pos(status);
-		
-		
-
-
-		//state = mpd_status_get_state(status);
-		//if(state==MPD_STATE_UNKNOWN)
-		//	{ printf("unkonwn\n");
-		//	} else if(state==MPD_STATE_PLAYING)
-		//		{
-		//			printf("playing");
-		//		}
-		//printf("state: %s\n",state);
 
 		printf("%s\n",transmitter);
+		for(int i = 0; i<strlen(transmitter)+1;i++)
+		{	
+			//printf("writing character\n");
+			char tmp = transmitter[i];
+			write(tty_fd, &tmp, 1);
+		}
+		printf("writing on serial complete\n");
 		mpd_status_free(status);
 		}
 		//usleep(50000);
 		sleep(1);
-                if (read(tty_fd,&c,1)>0)     {//   write(STDOUT_FILENO,&c,1);              // if new data is available on the serial port, print it out
+		/*
+                */
+	
+
+        }
+	mpd_connection_free(conn);
+        close(tty_fd);
+}
+
+
+
+void signal_handler_IO (int status)
+{
+	
+    printf("received data from UART.\n");
+/*
+	if (read(tty_fd,&c,1)>0)     {//   write(STDOUT_FILENO,&c,1);              // if new data is available on the serial port, print it out
 			//write(STDOUT_FILENO,&c,1);
 
 
 			if(c=='1') {
-				system("mpc volume -2");//printf("v-\n");
+				//system("mpc volume -2");//printf("v-\n");
 			}
 			else if(c=='2') {
-				system("mpc volume +2"); //("v+\n");
+				//system("mpc volume +2"); //("v+\n");
 			}
 			else if(c=='3') {
 				//mpd_send_toggle_pause(conn);
@@ -315,16 +311,7 @@ int main(int argc,char** argv)
 			}
 
 		}
-	
+*/
+	printf("done\n");
 
-        }
-	mpd_connection_free(conn);
-        close(tty_fd);
-}
-
-
-
-void signal_handler_IO (int status)
-{
-    // printf("received data from UART.\n");
 }

@@ -27,9 +27,10 @@ void signal_handler_IO (int status);   /* definition of signal handler */
 	struct mpd_status *status;
 	enum mpd_state  state;
 	struct mpd_entity * entity;
-	int elapsed_time, total_time, kbit_rate, currentPositionInPlaylist, totalCountOfSongsInPlaylist, volume = 0;
+	struct mpd_song * song;
+	int elapsed_time, total_time, kbit_rate, currentPositionInPlaylist, totalCountOfSongsInPlaylist, volume, song_id = 0;
 	bool consume, random_mode, single;
-	char transmitter[255];
+	char transmitter[255], artist[100], title[100];
 	
 int main(int argc,char** argv)
 {
@@ -100,7 +101,23 @@ int main(int argc,char** argv)
 		if(status != NULL){
 		strcpy(transmitter,"");
 
-		//ToDo Artist
+
+		if(mpd_status_get_song_id(status) != song_id)
+		{
+			song_id=mpd_status_get_song_id(status);
+			song = mpd_run_current_song(conn);
+			strncpy(artist,mpd_song_get_tag(song,MPD_TAG_ARTIST,0),99);
+			strcat(artist, ";");
+			strcat(transmitter,artist);
+
+			strncpy(title,mpd_song_get_tag(song,MPD_TAG_TITLE,0),99);
+			strcat(title,";");
+			strcat(transmitter,title);
+		} 
+		else
+		{
+			strcat(transmitter,";;");
+		}
 		//ToDo Title
 
 

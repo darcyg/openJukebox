@@ -16,7 +16,7 @@
  int n = LOW;
  boolean boot = false;
  String transmitter = "";
- String artist, title;
+ String artist, title, combined;
  char character;
  int elapsedTime = 0;
  int totalTime = 0;
@@ -25,12 +25,15 @@
  int currentPositionInPlaylist = 0;
  int totalCountofSongsInPlaylist = 0;
  int volume =0;
- boolean contentChanged = false;
+ boolean contentChanged = false, combinedChanged;
+ unsigned long time, idleTime;
  
  boolean consume,single, randomMode = false;
  LiquidCrystal_I2C lcd(0x27,20,4);
  boolean line_read_complete = false;
  void setup() { 
+   time = millis();
+   idleTime = millis();
    lcd.init();
    lcd.backlight();
    lcd.setCursor(0,0);
@@ -89,20 +92,21 @@
    }
    button1PinLast = n;
    
-   if (line_read_complete & countSeperator()==11) {
-     //Serial.println("line read complete");
-     lcd.clear();
+   if (line_read_complete & countSeperator()==11 & transmitter != ";;;;;;;;;;;\n") {
+     //lcd.clear();
     if(transmitter.indexOf(";")>0 & transmitter.substring(0,transmitter.indexOf(";")) != artist){
       artist = transmitter.substring(0,transmitter.indexOf(";"));
       contentChanged = true;
+      combinedChanged = true;
       nextValue();
     } else {
       nextValue();
     }
-    //Serial.println(transmitter);
+
     if(transmitter.indexOf(";")>0 & transmitter.substring(0,transmitter.indexOf(";")) != title){
       title = transmitter.substring(0,transmitter.indexOf(";"));
       contentChanged = true;
+      combinedChanged = true;
       nextValue();
     } else {
       nextValue();
@@ -110,9 +114,7 @@
 
       
     if(transmitter.indexOf(";")>0 & transmitter.substring(0,transmitter.indexOf(";")).toInt() != elapsedTime){
-      //Serial.println(transmitter.substring(0,transmitter.indexOf(";")));
       elapsedTime = transmitter.substring(0,transmitter.indexOf(";")).toInt();
-      Serial.print("elapsedTime:");Serial.println(elapsedTime);
       contentChanged = true;
       nextValue();
     } else {
@@ -121,7 +123,6 @@
     
     if(transmitter.indexOf(";")>0 & transmitter.substring(0,transmitter.indexOf(";")).toInt() != totalTime){
        totalTime =  transmitter.substring(0,transmitter.indexOf(";")).toInt();
-       Serial.print("totaltime:");Serial.println(totalTime);
        contentChanged = true;
        nextValue();
     } else {
@@ -185,7 +186,7 @@
       nextValue(); 
     }
     
-        if(transmitter.length()>0 & transmitter.toInt() != volume){
+        if(transmitter.length()>1 & transmitter.toInt() != volume){
       volume = transmitter.toInt();
       contentChanged = true;
       //nextValue();
@@ -206,10 +207,13 @@
     Serial.print("Track:");Serial.print(currentPositionInPlaylist);Serial.print("/");Serial.println(totalCountofSongsInPlaylist);
     Serial.print("Volume:");Serial.println(volume); 
    */
-   if(contentChanged){
+   if(contentChanged & boot){
+      lcd.display();
+      lcd.backlight();
       lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print((artist + "/" + title).substring(0,19)  );
+      idleTime=millis();
+
+      //lcd.print((artist + "/" + title).substring(0,19)  );
       lcd.setCursor(0,1);
 
       lcd.print(elapsedTime/60);lcd.print(":");lcd.print(elapsedTime%60);lcd.print("/");lcd.print(totalTime/60);lcd.print(":");lcd.print(totalTime%60);
@@ -226,23 +230,60 @@
       if(kbit_rate <1000) lcd.setCursor(13,2); else lcd.setCursor(12,2);
       lcd.print(kbit_rate);
       lcd.setCursor(13,3);
-      lcd.print("Vol:"); lcd.print(volume);
+      lcd.print("Vol:"); 
+      if(volume==100)lcd.setCursor(17,3); else if(volume <10) lcd.setCursor(19,3); else lcd.setCursor(18,3);
+      lcd.print(volume);
       
       lcd.setCursor(0,3);
       lcd.print("Title:");lcd.print(currentPositionInPlaylist);lcd.print("/");lcd.print(totalCountofSongsInPlaylist);
       contentChanged == false;
    }
+     
+   
+     if(combinedChanged){
+       combined = artist + "/" + title + " ";
+       if(combined.length()<20){
+         for(int i=combined.length();i<=20;i++){
+          combined = combined + " "; 
+         }
+       }
+       combinedChanged = false;
+     }
+     
 
-
+  
       
  
 
      
     line_read_complete=false;  
-   } else if(line_read_complete & countSeperator() != 11) {
+   } else if(line_read_complete & countSeperator() != 11 & boot) {
      transmitter = "";
      line_read_complete=false;
-   }   
+   }  
+      if(millis() - idleTime < 20000 &boot) { // 20000 for 20sec//300000ms for 5minutes to blank display
+        if(millis()-time >= 200 &boot){
+          lcd.display();
+          lcd.backlight();
+          lcd.setCursor(0,0);
+          lcd.print("                  ");
+          lcd.setCursor(0,0);
+          lcd.print(combined.substring(0,20));
+          shiftLeft();
+          time = millis();
+        }
+      } else if(boot){
+        lcd.clear();
+        lcd.noBacklight();
+        lcd.noDisplay();
+      }
+      /*
+      lcd.setCursor(0,0);
+      lcd.print("                  ");
+      lcd.setCursor(0,0);
+      lcd.print(combined.substring(0,20));
+      //shiftLeft(); 
+      */ 
  } 
  
  
@@ -291,4 +332,17 @@ int countSeperator(){
     if(transmitter[i]==';'){seperator++;}
   }
   return seperator;
+}
+
+void shiftLeft(){
+  if(combined.length()>0)
+  {
+  char tmp;
+  tmp=combined[0]; //last character
+  for(int i=0;i<combined.length()-1;i++){
+    combined[i]=combined[i+1];
+    //Serial.print(combined[i]);
+   }
+  combined[combined.length()-1]=tmp;
+  }
 }

@@ -252,19 +252,20 @@ int main(int argc,char** argv)
 			volume = mpd_status_get_volume(status);
 			char str[4];
 			sprintf(str,"%d",volume);
-			strcat(str,";\n");
+			strcat(str,"\n");
 			strcat(transmitter,str);
 		} else {
-			strcat(transmitter,";\n");
+			strcat(transmitter,"\n");
 		}
 
-		printf("%s\n",transmitter);
-		for(int i = 0; i<strlen(transmitter)+1;i++)
+		printf("%s",transmitter);
+		for(int i = 0; i<strlen(transmitter);i++)
 		{	
 			//printf("writing character\n");
 			char tmp = transmitter[i];
 			write(tty_fd, &tmp, 1);
 		}
+		write(tty_fd,"\n",1);
 		printf("writing on serial complete\n");
 		mpd_status_free(status);
 		}
@@ -272,6 +273,7 @@ int main(int argc,char** argv)
 		sleep(1);
 		/*
                 */
+		//connected =0;
 	
 
         }

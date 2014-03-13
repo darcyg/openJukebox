@@ -252,10 +252,10 @@ int main(int argc,char** argv)
 			volume = mpd_status_get_volume(status);
 			char str[4];
 			sprintf(str,"%d",volume);
-			strcat(str,"\n");
+			//strcat(str,"\n");
 			strcat(transmitter,str);
 		} else {
-			strcat(transmitter,"\n");
+			//strcat(transmitter,"\n");
 		}
 
 		printf("%s",transmitter);
@@ -311,7 +311,6 @@ void signal_handler_IO (int status)
 			else if(c=='6') {
 				mpd_send_toggle_pause(conn);
 			}
-
 		}
 */
 	printf("done\n");

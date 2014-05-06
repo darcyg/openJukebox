@@ -91,7 +91,6 @@ int main(int argc,char** argv)
 	tcgetattr(tty_fd,&oldtio); /* save current port settings */
 
 	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
-
 		 /*
 		BAUDRATE: Set bps rate. You could also use cfsetispeed and cfsetospeed.
 		CRTSCTS : output hardware flow control (only used if the cable has
@@ -108,7 +107,7 @@ int main(int argc,char** argv)
 		otherwise make device raw (no other input processing)
 		IGNCR: Ignore carriage return on input
 		*/
-	newtio.c_iflag = IGNPAR | IGNCR;
+	newtio.c_iflag = IGNPAR | IGNCR | ICRNL;
 		 /*
 		Raw output.
 		*/
@@ -144,7 +143,7 @@ int main(int argc,char** argv)
 	//newtio.c_cc[VLNEXT] = 0; /* Ctrl−v */
 	//newtio.c_cc[VEOL2] = 0; /* '\0' */
 
-			 /*
+		 /*
 		now clean the modem line and activate the settings for the port
 		*/
 	tcflush(tty_fd, TCIFLUSH);
@@ -162,7 +161,8 @@ int main(int argc,char** argv)
 		subsequent reads will return the remaining chars. res will be set
 		to the actual number of characters actually read */
 	writeOnSerial();
-	printf(".\n");usleep(10000000);
+	sleep(1);
+	//printf(".\n");usleep(1000000);
 	if(wait_flag==FALSE){
 		res = read(tty_fd,buf,255);
 		buf[res]=0; /* set end of string, so we can printf */
@@ -176,7 +176,7 @@ int main(int argc,char** argv)
 			}
 			else if(c=='3') {
 				//mpd_send_toggle_pause(conn);
-				//system("mpc toggle");
+				system("mpc -h 192.168.1.136 toggle");
 			}
 			else if(c=='4') {
 				mpd_send_previous(conn);
@@ -194,235 +194,6 @@ int main(int argc,char** argv)
 		}
 	}	
 	//if (buf[0]=='z') STOP=TRUE;
-
-
-/*
-       // printf("Please start with %s /dev/ttyS1 (for example)\n",argv[0]);
-        memset(&stdio,0,sizeof(stdio));
-        stdio.c_iflag=0;
-        stdio.c_oflag=0;
-        stdio.c_cflag=0;
-        stdio.c_lflag=0;
-        stdio.c_cc[VMIN]=1;
-        stdio.c_cc[VTIME]=0;
-        tcsetattr(STDOUT_FILENO,TCSANOW,&stdio);
-        tcsetattr(STDOUT_FILENO§,TCSAFLUSH,&stdio);
-        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);       // make the reads non-blocking
-
-
-
-
-        memset(&tio,0,sizeof(tio));
-        tio.c_iflag=0;
-        tio.c_oflag=0;
-        tio.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
-        tio.c_lflag=0;
-        tio.c_cc[VMIN]=1;
-        tio.c_cc[VTIME]=5;
-
-        
-
-	//saio.sa_handler = signal_handler_IO;
-	//saio.sa_flags = 0;
-	//saio.sa_restorer = NULL;
-	//sigaction(SIGIO,&saio,NULL);
-
-     fcntl(tty_fd, F_SETFL, FNDELAY);
-     fcntl(tty_fd, F_SETOWN, getpid());
-     fcntl(tty_fd, F_SETFL,  O_ASYNC );
-
-
-        cfsetospeed(&tio,B9600);            // 9600 baud
-        cfsetispeed(&tio,B9600);            // 9600 baud
-
-        tcsetattr(tty_fd,TCSANOW,&tio);
-	//printf("UART configured....\n");
-	connected =1;
-        while (connected == 1)
-        {	
-		//Format for serial line. Artist;Title;elapsedTime;totalTime;consume;random_mode;single;state;kbit_rate;currentPositionsInPlaylist;totalCountOfSongsInPlaylist;volume
-		//each value which is noch changed since last transmit is not retransmittet
-		//entity = mpd_entity_begin(conn)
-		sleep(1);
-		status = mpd_run_status(conn);
-		if(status != NULL){
-		strcpy(transmitter,"");
-
-
-		if(mpd_status_get_song_id(status) != song_id)
-		{
-			song_id=mpd_status_get_song_id(status);
-			song = mpd_run_current_song(conn);
-			strncpy(artist,mpd_song_get_tag(song,MPD_TAG_ARTIST,0),99);
-			strcat(artist, ";");
-			strcat(transmitter,artist);
-
-			strncpy(title,mpd_song_get_tag(song,MPD_TAG_TITLE,0),99);
-			strcat(title,";");
-			strcat(transmitter,title);
-		} 
-		else
-		{
-			strcat(transmitter,";;");
-		}
-
-
-		if(mpd_status_get_elapsed_time(status) != elapsed_time)
-		{
-			elapsed_time = mpd_status_get_elapsed_time(status);
-			char str[4];
-			sprintf(str, "%d",elapsed_time);
-			strcat(str,";");
-			strcat(transmitter,str);
-		} else {
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_total_time(status) != total_time)
-		{
-			total_time = mpd_status_get_total_time(status);
-			char str[4];
-			sprintf(str,"%d",total_time);
-			strcat(str,";");
-			strcat(transmitter,str);
-		} else {
-			strcat(transmitter,";");
-		}
-			
-		if(mpd_status_get_consume(status) != consume)
-		{
-			consume = mpd_status_get_consume(status);
-			if(consume) 
-			{
-				strcat(transmitter,"1;"); 
-			}
-			else 
-			{
-				strcat(transmitter,"0;");
-			}
-		} else
-			{
-			strcat(transmitter,";");
-			}
-
-		if(mpd_status_get_random(status) != random_mode)
-		{
-			random_mode = mpd_status_get_random(status);
-			if(random)
-			{
-				strcat(transmitter,"1;"); 
-			}
-			else 
-			{
-				strcat(transmitter,"0;");
-			}
-		} else
-			{
-			strcat(transmitter,";");
-			}
-
-		if(mpd_status_get_single(status) != single)
-		{
-			single = mpd_status_get_single(status);
-			if(single)
-			{
-				strcat(transmitter,"1;");
-			}
-			else
-			{
-				strcat(transmitter,"0;");
-			}
-		} else
-			{
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_state(status) != state)
-		{
-			state=mpd_status_get_state(status);
-			if(state == 0)  //unknown
-			{ 
-				strcat(transmitter,"0;");
-			} else if (state == 1) //stop
-			{
-				strcat(transmitter,"1;");
-			} else if(state == 2) //play
-			{
-				strcat(transmitter,"2;");
-			} else if(state == 3) //pause
-			{
-				strcat(transmitter,"3;"); 
-			}
-		}
-		else 
-		{
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_kbit_rate(status) != kbit_rate)
-		{
-			kbit_rate = mpd_status_get_kbit_rate(status);
-			char str[10];
-			sprintf(str, "%d",kbit_rate);
-			strcat(str,";");
-			strcat(transmitter,str);
-		} else {
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_song_pos(status) != currentPositionInPlaylist)
-		{
-			currentPositionInPlaylist = mpd_status_get_song_pos(status);
-			char str[6];
-			sprintf(str, "%d",currentPositionInPlaylist);
-			strcat(str,";");
-			strcat(transmitter,str);
-		} else {
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_queue_length(status) != totalCountOfSongsInPlaylist)
-		{
-			totalCountOfSongsInPlaylist = mpd_status_get_queue_length(status);
-			char str[6];
-			sprintf(str, "%d",totalCountOfSongsInPlaylist);
-			strcat(str,";");
-			strcat(transmitter,str);
-		} else {
-			strcat(transmitter,";");
-		}
-
-		if(mpd_status_get_volume(status) != volume)
-		{
-			volume = mpd_status_get_volume(status);
-			char str[4];
-			sprintf(str,"%d",volume);
-			//strcat(str,"\n");
-			strcat(transmitter,str);
-		} else {
-			//strcat(transmitter,"\n");
-		}
-
-		printf("%s",transmitter);
-		for(int i = 0; i<strlen(transmitter);i++)
-		{	
-			//printf("writing character\n");
-			char tmp = transmitter[i];
-			write(tty_fd, &tmp, 1);
-		}
-		write(tty_fd,"\n",1);
-		printf("writing on serial complete\n");
-		mpd_status_free(status);
-		}
-		//usleep(50000);
-		sleep(1);
-		/*
-                */
-		//connected =0;
-	
-
-       //}
-
 	
 	mpd_connection_free(conn);
         close(tty_fd);
@@ -430,7 +201,7 @@ int main(int argc,char** argv)
 
 void signal_handler_IO(int status)
 {
-	printf("recieved SIGIO signal.\n");
+	//printf("recieved SIGIO signal.\n");
 	wait_flag=FALSE;
 }
 
@@ -534,13 +305,13 @@ status = mpd_run_status(conn);
 			state=mpd_status_get_state(status);
 			if(state == 0)  //unknown
 			{ 
-				strcat(transmitter,"0;");
+				strcat(transmitter,"2;");
 			} else if (state == 1) //stop
 			{
 				strcat(transmitter,"1;");
 			} else if(state == 2) //play
 			{
-				strcat(transmitter,"2;");
+				strcat(transmitter,"0;");
 			} else if(state == 3) //pause
 			{
 				strcat(transmitter,"3;"); 
